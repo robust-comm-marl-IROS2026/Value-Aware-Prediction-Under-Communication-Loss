@@ -1,0 +1,21 @@
+perception: True
+checkpoint_path: ""
+load_step: 0
+
+model_type: "joint_obs"
+
+comm_at_t0: True
+hidden_dim: 128
+append_masks_to_rl_input: False
+train_comm_p: "uniform_sampling"
+accumulate_masks: False
+teacher_forcing: False
+
+learning_rate: 0.001
+grad_clip: 1.0 
+batch_size: 32
+buffer_size: 5_000
+
+trainer_log_interval: 10_000
+save_model: True
+save_model_interval: 1_000_000

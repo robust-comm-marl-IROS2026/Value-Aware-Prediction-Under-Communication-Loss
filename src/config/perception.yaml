@@ -1,0 +1,40 @@
+perception: True # Whether to use the perception layer.
+checkpoint_path: "" # Load a perception model checkpoint from this path.
+load_step: 0 # Load a perception model trained on this many timesteps (0 if choose max possible).
+
+# Model type:
+#  - `state`: simply returns the environment's state variable.
+#  - `joint_obs`: concatenates all observations.
+#  - `masked_joint_obs`: concatenates all observations and masks them with zeros according to communication failures.
+#  - `maro`: model that uses a GRU as predictive model (predicting deltas over observations).
+
+# Sampling schemes for train_comm_p:
+#  - float value: rate (probability) at which communication (observations sharing) occurs during training.
+#  - "uniform_sampling": rate is randomly sample from U(0,1).
+#  - "extremes_sampling": rate is randomly chosen from {0, 1}
+#  - "extremes_and_middle_sampling": rate is randomly chosen from {0, 0.5, 1}
+#  - "uniform_and_extremes_sampling": rate is randomly chosen from {0, 1, U(0,1)}
+
+model_type: "maro"
+
+# Model hyperparameters.
+train_comm_p: 1.0  # Sampling scheme to be used during training.
+comm_at_t0: True                  # (Only `masked_joint_obs`, `maro`) Whether to force communication at t=0.
+append_masks_to_rl_input: False   # (Only `maro` and `masked_joint_obs`) Whether to append masks to RL input.
+accumulate_masks: False           # (Only `maro` and `masked_joint_obs`) Whether to accumulate masks across consecutive timesteps without communication.
+hidden_dim: 128                   # (Only `maro`) Neural networks hidden dim.
+teacher_forcing: False            # (Only `maro`) Whether to autoregressively feed the outputs of the perceptual model during the training of the perceptual model (the rate at which teacher forcing is applied is given by the `train_comm_p` argument).         
+
+# Training Hyperparameters.
+learning_rate: 0.001
+grad_clip: 1.0 # Grad clip with value given by this variable. If no arg (None) then no grad clip.
+batch_size: 32
+buffer_size: 5_000
+
+# Logging and model saving options.
+# (Models are saved in "/results/perception_models/" folder).
+trainer_log_interval: 20_000
+save_model: True
+save_model_interval: 1_000_000
+
+adv_lambda: 1.0
