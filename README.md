@@ -1,5 +1,8 @@
 # Value-Aware Prediction for Robust Multi-Agent Coordination Under Communication Loss
 
+This repository is maintained anonymously for review purposes.
+GitHub contributor attribution may reflect hosting account activity rather than authorship.
+
 ## Overview
 
 This codebase implements **MARO (Multi-Agent Response Observation)**, a hybrid perception module for multi-agent reinforcement learning that enables centralized training via learned inter-agent communication with configurable dropout. MARO can be combined with any standard MARL algorithm.
