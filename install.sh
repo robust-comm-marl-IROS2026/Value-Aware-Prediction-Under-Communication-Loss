@@ -8,16 +8,10 @@ pip3 install --upgrade pip
 pip3 install -r requirements.txt
 
 # Clone and install MPE.
-git clone https://github.com/openai/multiagent-particle-envs.git
+git clone https://github.com/PPSantos/multiagent-particle-envs.git
 cd multiagent-particle-envs
 pip3 install -e .
 cd ..
 
-# Clone and install lbforaging (v11 branch).
-git clone https://github.com/semitable/lb-foraging.git
-cd lb-foraging
-git checkout v11
-pip3 install -e .
-cd ..
-
-echo "Installation complete."
+# Test installation.
+python3 src/main.py --config=iql_ns --env-config=gymma with env_args.key="SimpleSpreadXY-v0"

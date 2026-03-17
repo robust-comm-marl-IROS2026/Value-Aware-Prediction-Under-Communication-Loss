@@ -1,140 +1,75 @@
-# Value-Aware Prediction for Robust Multi-Agent Coordination Under Communication Loss
+# Value-Aware MARO
 
-This repository is maintained anonymously for review purposes.
-GitHub contributor attribution may reflect hosting account activity rather than authorship.
+This repository contains the code used to run our experiments on **Multi-Agent Particle Environments (MPE)** using **IPPO** and **MAPPO**, and to reproduce our comparison between:
 
-## Overview
+- **Value-Aware MARO**: `adv_lambda: 1.0`
+- **MARO (baseline)**: `adv_lambda: 0.0`
 
-This codebase implements **MARO (Multi-Agent Response Observation)**, a hybrid perception module for multi-agent reinforcement learning that enables centralized training via learned inter-agent communication with configurable dropout. MARO can be combined with any standard MARL algorithm.
-
-The algorithms are derived from [hybrid-marl](https://github.com/PPSantos/hybrid-marl), which extends the [EPyMARL](https://github.com/uoe-agents/epymarl) library.
-
-## Visualizations
-
-Episode rollouts (communication probability 1.0) for selected MPE environments:
-
-| Environment | Demo |
-|-------------|------|
-| SimpleBlindDeaf (HearSee) | ![SimpleBlindDeaf-v0](gifs/SimpleBlindDeaf-v0_ep1_comm_p_1.00.gif) |
-| SimpleSpeakerListener | ![SimpleSpeakerListener-v0](gifs/SimpleSpeakerListener-v0_ep1_comm_p_1.00.gif) |
-| SimpleSpreadBlind (SpreadBlindfold) | ![SimpleSpreadBlind-v0](gifs/SimpleSpreadBlind-v0_ep1_comm_p_1.00.gif) |
-| SimpleSpreadXY (SpreadXY-2) | ![SimpleSpreadXY-v0](gifs/SimpleSpreadXY-v0_ep1_comm_p_1.00.gif) |
-| SimpleSpreadXY4 (SpreadXY-4) | ![SimpleSpreadXY4-v0](gifs/SimpleSpreadXY4-v0_ep1_comm_p_1.00.gif) |
+`adv_lambda` lives in `src/config/perception.yaml` and controls how advantage-weighted training signals influence the perception module.
 
 ## Dependencies
 
-This project requires the following external libraries to be installed:
+- Python 3.8.x (original experiments were run with 3.8.10)
+- MPE (`multiagent-particle-envs`)
 
-- **Multi-Agent Particle Environments (MPE):** [https://github.com/openai/multiagent-particle-envs](https://github.com/openai/multiagent-particle-envs)
-- **Level-Based Foraging (LBF):** [https://github.com/semitable/lb-foraging](https://github.com/semitable/lb-foraging)
+Note: This repo includes a copy of MPE under `multiagent-particle-envs/`.
 
 ## Installation
-
-Tested with Python 3.8.10 on Ubuntu. To install the codebase and its dependencies:
 
 ```bash
 ./install.sh
 ```
 
-This script will:
-1. Create a virtual environment and install Python dependencies from `requirements.txt`
-2. Clone and install the [MPE](https://github.com/openai/multiagent-particle-envs) environment
-3. Clone and install the [LBF](https://github.com/semitable/lb-foraging) environment (v11 branch)
+## Running experiments
 
-## Running Experiments
+Use `run.sh` (or the manual command below). Key variables:
 
-Use `run.sh` to launch experiments. Configure the following variables:
+### Environments (MPE)
 
-### Environments
-
-| Variable value | Environment name |
+| `ENV` value | Environment |
 |---|---|
 | `SimpleSpreadXY-v0` | SpreadXY-2 |
 | `SimpleSpreadXY4-v0` | SpreadXY-4 |
 | `SimpleSpreadBlind-v0` | SpreadBlindfold |
 | `SimpleBlindDeaf-v0` | HearSee |
-| `SimpleSpread-v0` | SimpleSpread |
 | `SimpleSpeakerListener-v0` | SimpleSpeakerListener |
-| `Foraging-2s-15x15-2p-2f-coop-v2` | LBF |
 
 ### Algorithms
 
-| MPE | LBF |
+| `ALGO` value | Description |
 |---|---|
-| `iql_ns` | `iql_ns_lbf` |
-| `qmix_ns` | `qmix_ns_lbf` |
-| `ippo_ns` | `ippo_ns_lbf` |
-| `mappo_ns` | `mappo_ns_lbf` |
+| `ippo` | IPPO |
+| `ippo_ns` | IPPO (NS variant) |
+| `mappo` | MAPPO |
+| `mappo_ns` | MAPPO (NS variant) |
 
-### Perception Models
+### Perception (MARO) and `adv_lambda`
 
-| Variable value | Description |
-|---|---|
-| `obs` | Observation only (no perception module) |
-| `joint_obs` | Oracle (full joint observation) |
-| `joint_obs_drop_test` | Masked joint observation |
-| `ablation_no_pred` | MD baseline |
-| `ablation_no_pred_masks` | MD with masks baseline |
-| `maro_no_training` | MARO |
-| `maro` | MARO with dropout |
+Our comparison is controlled by a single hyperparameter in `src/config/perception.yaml`:
 
-### Time Limits
+- **Value-Aware MARO**: `adv_lambda: 1.0`
+- **MARO baseline**: `adv_lambda: 0.0`
 
-- MPE environments: `TIME_LIMIT=25`
-- LBF environments: `TIME_LIMIT=30`
+You can switch it either by editing `src/config/perception.yaml` (one line) or by overriding from the command line with `with perception_args.adv_lambda=...`.
 
-### Example
+### Time limit
+
+- `TIME_LIMIT=25` for the MPE environments above.
+
+### Example (single run)
 
 ```bash
 ENV="SimpleSpreadBlind-v0"
-ALGO="qmix_ns"
-PERCEPTION="maro"
+ALGO="mappo_ns"
+PERCEPTION="maro"   # MARO config lives in src/config/custom_configs/maro.yaml
 TIME_LIMIT=25
+ADV_LAMBDA=1.0       # 1.0 = Value-Aware MARO, 0.0 = MARO baseline
 
-CONFIG_SOURCE="src/config/custom_configs/${PERCEPTION}.yaml"
-cp $CONFIG_SOURCE src/config/perception.yaml
+cp "src/config/custom_configs/${PERCEPTION}.yaml" src/config/perception.yaml
 
-python3 src/main.py --config=$ALGO --env-config=gymma \
-    with env_args.key=$ENV env_args.time_limit=$TIME_LIMIT seed=0
+python3 src/main.py --config="$ALGO" --env-config=gymma \
+    with env_args.key="$ENV" env_args.time_limit=$TIME_LIMIT seed=0 perception_args.adv_lambda=$ADV_LAMBDA
 ```
 
-## Project Structure
-
-```
-.
-├── README.md
-├── requirements.txt
-├── install.sh              # Installation script
-├── run.sh                  # Experiment runner
-├── gifs/                   # Environment rollout visualizations
-└── src/
-    ├── main.py             # Entry point (Sacred experiment)
-    ├── visualize_mappo.py  # Visualization of trained agents
-    ├── run.py              # Training loop
-    ├── config/
-    │   ├── default.yaml    # Default hyperparameters
-    │   ├── algs/           # Algorithm configs
-    │   ├── envs/           # Environment configs
-    │   └── custom_configs/ # Perception model configs
-    ├── components/         # Replay buffer, action selectors
-    ├── controllers/        # Multi-agent controllers
-    ├── learners/           # RL algorithm implementations
-    ├── modules/
-    │   ├── agents/         # Agent networks (RNN-based)
-    │   ├── critics/        # Critic networks
-    │   └── mixers/         # Value mixing networks (QMIX, VDN, QTRAN)
-    ├── perception/
-    │   ├── models/         # MARO and baseline perception models
-    │   └── trainers/       # Perception model training
-    ├── envs/               # Environment wrappers and custom envs
-    ├── runners/            # Episode and parallel runners
-    ├── pretrained/         # Pretrained agent code for Tag env
-    └── utils/              # Logging, RL utilities
-```
-
-## Acknowledgments
-
-- [EPyMARL](https://github.com/uoe-agents/epymarl) — Extended PyMARL framework
-- [hybrid-marl](https://github.com/PPSantos/hybrid-marl) — Base algorithm implementations
-- [OpenAI MPE](https://github.com/openai/multiagent-particle-envs) — Multi-agent particle environments
-- [LBF](https://github.com/semitable/lb-foraging) — Level-based foraging environment
+Outputs are written under `results/` (Sacred runs under `results/sacred/` and CSV logs under `results/logs/`).
+   
