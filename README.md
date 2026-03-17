@@ -86,4 +86,11 @@ python3 src/main.py --config="$ALGO" --env-config=gymma \
 ```
 
 Outputs are written under `results/` (Sacred runs under `results/sacred/` and CSV logs under `results/logs/`).
+
+## References
+
+- [EPyMARL](https://github.com/uoe-agents/epymarl) — Extended PyMARL framework
+- [hybrid-marl](https://github.com/PPSantos/hybrid-marl) — Base algorithm implementations
+- [OpenAI MPE](https://github.com/openai/multiagent-particle-envs) — Multi-agent particle environments
+- [LBF](https://github.com/semitable/lb-foraging) — Level-based foraging environment
    
